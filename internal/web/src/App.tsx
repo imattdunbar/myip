@@ -3,7 +3,7 @@ import AppState from './store/AppState'
 import { useSnapshot } from 'valtio'
 
 function App() {
-	const { userPortInput, isPortOpen, userIP, portErrorMessage } = useSnapshot(AppState)
+	const { userPortInput, isPortOpen, userIP, portErrorMessage, checkingPort } = useSnapshot(AppState)
 
 	function handleKeyDown(event: any) {
 		if (event.key === 'Enter') {
@@ -16,6 +16,8 @@ function App() {
 	}
 
 	async function doCheck() {
+		AppState.isPortOpen = undefined
+		AppState.checkingPort = true
 		AppState.portErrorMessage = ''
 		checkPort(AppState.userPortInput)
 			.then((open) => {
@@ -25,6 +27,9 @@ function App() {
 				console.log('Error with port:', e)
 				AppState.isPortOpen = undefined
 				AppState.portErrorMessage = 'Invalid Port'
+			})
+			.finally(() => {
+				AppState.checkingPort = false
 			})
 	}
 
@@ -36,13 +41,17 @@ function App() {
 				return <div className="badge badge-error w-32 p-4 text-gray-300 font-semibold">Port Closed</div>
 			}
 		} else {
+			if (checkingPort) {
+				return <span className="loading loading-ball loading-lg"></span>
+			}
+
 			return <p className="text-red-400 font-medium text-2xl">{portErrorMessage}</p>
 		}
 	}
 
 	return (
 		<>
-			<div className="flex flex-col w-full min-h-dvh items-center justify-center bg-slate-900 space-y-4">
+			<div className="flex flex-col w-full min-h-dvh items-center justify-center bg-slate-900 space-y-6">
 				<h1 className="text-4xl lg:text-8xl text-sky-500 font-bold p-2">{userIP}</h1>
 
 				<div className="flex space-x-4">

@@ -5,6 +5,7 @@ type AppState = {
 	userIP: string
 	portErrorMessage: string
 	userPortInput: string
+	checkingPort: boolean
 	isPortOpen?: boolean
 }
 
@@ -12,6 +13,7 @@ const initial: AppState = {
 	userIP: '',
 	portErrorMessage: '',
 	userPortInput: '',
+	checkingPort: false,
 	isPortOpen: undefined,
 }
 
