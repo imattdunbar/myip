@@ -52,8 +52,7 @@ function App() {
 	return (
 		<>
 			<div className="flex flex-col w-full min-h-dvh items-center justify-center bg-slate-900 space-y-6">
-				<h1 className="text-4xl lg:text-8xl text-sky-500 font-bold p-2">{userIP}</h1>
-
+				<h1 className="text-4xl md:text-6xl lg:text-8xl text-sky-500 font-bold p-2">{userIP}</h1>
 				<div className="flex space-x-4">
 					<input
 						type="text"
