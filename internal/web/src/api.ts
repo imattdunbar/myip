@@ -1,9 +1,12 @@
+import { QueryClient } from '@tanstack/react-query'
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 import z from 'zod'
 
 const ax: AxiosInstance = axios.create({
 	baseURL: getBaseURL(),
 })
+
+export const queryClient = new QueryClient()
 
 function getBaseURL(): string {
 	try {
@@ -30,7 +33,12 @@ export async function getIP(): Promise<string> {
 }
 
 export async function checkPort(userInput: string): Promise<boolean> {
-	const port = z.coerce.number().parse(userInput)
+	let port: number
+	try {
+		port = z.coerce.number().parse(userInput)
+	} catch {
+		throw 'Invalid Port'
+	}
 
 	const config: AxiosRequestConfig = {
 		url: `/checkport`,

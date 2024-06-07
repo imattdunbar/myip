@@ -1,58 +1,72 @@
-import { checkPort, getIP } from './api'
-import AppState from './store/AppState'
-import { useSnapshot } from 'valtio'
+import { useQuery } from '@tanstack/react-query'
+import { checkPort, getIP, queryClient } from './api'
+import { useState } from 'react'
 
 function App() {
-	const { userPortInput, isPortOpen, userIP, portErrorMessage, checkingPort } = useSnapshot(AppState)
+	const IP_KEY = ['ip']
+	const PORT_KEY = ['port']
+
+	const [userPortInput, setUserPortInput] = useState('')
+
+	const ipQuery = useQuery({ queryKey: IP_KEY, queryFn: getIP })
+
+	const portQuery = useQuery({
+		queryKey: PORT_KEY,
+		queryFn: async () => {
+			return await checkPort(userPortInput)
+		},
+		enabled: false,
+		retry: false,
+	})
 
 	function handleKeyDown(event: any) {
 		if (event.key === 'Enter') {
-			doCheck()
+			doPortCheck()
 		}
 	}
 
 	function handleChange(event: any) {
-		AppState.userPortInput = event.target.value
+		setUserPortInput(event.target.value)
+		queryClient.resetQueries({ queryKey: PORT_KEY })
 	}
 
-	async function doCheck() {
-		AppState.isPortOpen = undefined
-		AppState.checkingPort = true
-		AppState.portErrorMessage = ''
-		checkPort(AppState.userPortInput)
-			.then((open) => {
-				AppState.isPortOpen = open
-			})
-			.catch((e) => {
-				console.log('Error with port:', e)
-				AppState.isPortOpen = undefined
-				AppState.portErrorMessage = 'Invalid Port'
-			})
-			.finally(() => {
-				AppState.checkingPort = false
-			})
+	async function doPortCheck() {
+		portQuery.refetch()
 	}
 
 	function PortResult() {
-		if (isPortOpen !== undefined) {
-			if (isPortOpen === true) {
-				return <div className="badge badge-success w-32 p-4 text-white font-semibold">Port Open</div>
-			} else {
-				return <div className="badge badge-error w-32 p-4 text-gray-300 font-semibold">Port Closed</div>
-			}
-		} else {
-			if (checkingPort) {
-				return <span className="loading loading-ball loading-lg"></span>
-			}
-
-			return <p className="text-red-400 font-medium text-2xl">{portErrorMessage}</p>
+		if (!portQuery.isFetched) {
+			return
 		}
+		if (portQuery.isError) {
+			return <p className="text-red-400 font-medium text-2xl">{`${portQuery.error}`}</p>
+		}
+		if (portQuery.isLoading) {
+			return <span className="loading loading-ball loading-lg"></span>
+		}
+
+		if (portQuery.data) {
+			return <div className="badge badge-success w-32 p-4 text-white font-semibold">Port Open</div>
+		} else {
+			return <div className="badge badge-error w-32 p-4 text-gray-300 font-semibold">Port Closed</div>
+		}
+	}
+
+	function UserIP() {
+		if (ipQuery.isError) {
+			return <p className="text-red-600 font-medium text-2xl text-wrap text-center">There was an error getting your IP address</p>
+		}
+		if (ipQuery.isLoading) {
+			return <span className="loading loading-ball loading-lg"></span>
+		}
+
+		return <h1 className="text-4xl md:text-6xl lg:text-8xl text-sky-500 font-bold p-2">{ipQuery.data}</h1>
 	}
 
 	return (
 		<>
 			<div className="flex flex-col w-full min-h-dvh items-center justify-center bg-slate-900 space-y-6">
-				<h1 className="text-4xl md:text-6xl lg:text-8xl text-sky-500 font-bold p-2">{userIP}</h1>
+				<UserIP />
 				<div className="flex space-x-4">
 					<input
 						type="text"
@@ -62,7 +76,7 @@ function App() {
 						onChange={handleChange}
 						onKeyDown={handleKeyDown}
 					/>
-					<button className="btn btn-info text-white" onClick={doCheck}>
+					<button className="btn btn-info text-white" onClick={doPortCheck}>
 						Check
 					</button>
 				</div>
