@@ -80,7 +80,7 @@ func CheckPortForIP(ip string, port string) bool {
 	log.Infof("Request sent to URL/PORT: %v", url)
 
 	client := &http.Client{
-		Timeout: 5 * time.Second,
+		Timeout: 200 * time.Millisecond,
 	}
 
 	resp, err := client.Get(url)
