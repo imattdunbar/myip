@@ -3,16 +3,17 @@ build-web:
 	@cd internal/web && bun i && bun run build
 
 run-web:
+	@echo "Running web..."
 	@cd internal/web && bun i && bun dev
 
-build:
+build-server:
 	@echo "Building server..."
 	@go build -o tmp/main cmd/main.go
 
-run: build
-	@echo "Running..."
+run-server: build-server
+	@echo "Running server..."
 	@cd tmp && ./main
 
 build-prod: build-web
-	@echo "Building..."
+	@echo "Building server..."
 	@go build -o out cmd/main.go
