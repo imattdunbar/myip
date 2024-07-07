@@ -54,7 +54,7 @@ function App() {
 
 	function UserIP() {
 		if (ipQuery.isError) {
-			return <p className="text-red-600 font-medium text-2xl text-wrap text-center">There was an error getting your IP address</p>
+			return <p className="text-red-600 font-semibold text-2xl text-wrap text-center">There was an error getting your IP address</p>
 		}
 		if (ipQuery.isLoading) {
 			return <span className="loading loading-ball loading-lg"></span>
@@ -76,7 +76,7 @@ function App() {
 						onChange={handleChange}
 						onKeyDown={handleKeyDown}
 					/>
-					<button className="btn btn-info text-white" onClick={doPortCheck}>
+					<button className="btn btn-info bg-blue-600 border-none text-white" onClick={doPortCheck}>
 						Check
 					</button>
 				</div>
