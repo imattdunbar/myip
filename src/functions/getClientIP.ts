@@ -3,15 +3,20 @@ import { getRequest } from '@tanstack/react-start/server'
 
 export const getClientIP = createServerFn({ method: 'GET' }).handler(async () => {
   let clientIP = 'Unknown IP'
-
   const request = getRequest()
-  const ipHeader = request.headers.get('x-forwarded-for') ?? ''
-  const ips = ipHeader.split(',').map((ip) => ip.trim())
-  if (ips.length > 1) {
-    clientIP = ips[ips.length - 1]
+  const realIP = request.headers.get('x-real-ip')
+
+  if (realIP) {
+    clientIP = realIP
+  } else {
+    const forwarded = request.headers.get('x-forwarded-for') ?? ''
+    const ips = forwarded.split(',').map((ip) => ip.trim())
+    if (ips.length > 1) {
+      clientIP = ips[ips.length - 1]
+    }
   }
 
-  console.log(`REQUEST HEADERS: ${JSON.stringify(request.headers)}`)
+  // console.log(`REQUEST HEADERS: ${JSON.stringify(request.headers)}`)
 
   return clientIP
 })
