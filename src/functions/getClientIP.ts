@@ -11,5 +11,7 @@ export const getClientIP = createServerFn({ method: 'GET' }).handler(async () =>
     clientIP = ips[ips.length - 1]
   }
 
+  console.log(`REQUEST HEADERS: ${JSON.stringify(request.headers)}`)
+
   return clientIP
 })
