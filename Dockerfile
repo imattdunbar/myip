@@ -1,20 +1,11 @@
-FROM golang:latest
+FROM oven/bun:latest
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y curl unzip && curl -fsSL https://bun.sh/install | bash
-ENV PATH="/root/.bun/bin:${PATH}"
-
 COPY . .
-
-RUN make build-prod
-
-# -- How to use env variables from Railway in this custom Dockerfile --
-# Specify the variable you need
-# ARG RAILWAY_SERVICE_NAME
-# Use the varible
-# RUN echo $RAILWAY_SERVICE_NAME
+RUN bun install
+RUN bun run build
 
 EXPOSE $PORT
 
-CMD ["./out"]
+CMD ["bun", "run", ".output/server/index.mjs"]
