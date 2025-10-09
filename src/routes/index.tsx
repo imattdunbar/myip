@@ -7,6 +7,7 @@ import { useEffect } from 'react'
 import z from 'zod'
 
 export const Route = createFileRoute('/')({
+  ssr: 'data-only',
   validateSearch: z.object({
     port: z.number().optional()
   }),
