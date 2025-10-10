@@ -2,18 +2,24 @@ import Icons from '@/components/Icons'
 import { IPSchema, useCheckPort } from '@/functions/checkPort'
 import { getClientIP } from '@/functions/getClientIP'
 import UserStore from '@/store/UserStore'
+import { queryOptions, useQuery } from '@tanstack/react-query'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import z from 'zod'
+
+const ipQueryOptions = queryOptions({
+  queryKey: ['clientIP'],
+  queryFn: getClientIP
+})
 
 export const Route = createFileRoute('/')({
   ssr: 'data-only',
   validateSearch: z.object({
     port: z.number().optional()
   }),
-  loader: async () => {
-    const clientIP = await getClientIP()
-    return { clientIP }
+  loader: async ({ context }) => {
+    // prefetch getting the clientIP on the server so the page loads immediately and the clientIP comes in when this finishes
+    context.queryClient.prefetchQuery(ipQueryOptions)
   },
   staleTime: 60 * 1000, // only re-request the client IP every 60 seconds, not every time
   gcTime: 60 * 1000, // await router.invalidate() to re-run the loader manually
@@ -21,7 +27,8 @@ export const Route = createFileRoute('/')({
 })
 
 function RouteComponent() {
-  const { clientIP } = Route.useLoaderData()
+  const { data: clientIP } = useQuery(ipQueryOptions)
+
   const { port: clientPort } = Route.useSearch()
 
   const { ip, port, errorMessage, input } = UserStore.use()
@@ -35,7 +42,7 @@ function RouteComponent() {
     if (clientPort) {
       UserStore.update({ input: `${clientPort}` })
     }
-  }, [])
+  }, [clientIP])
 
   async function handleCheck() {
     if (input === '') return
